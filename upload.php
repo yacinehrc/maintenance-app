@@ -1,9 +1,13 @@
 <?php
 require 'config.php';
 
-$formats = ['pdf', 'jpg', 'jpeg', 'png', 'txt', 'docx'];
+$formats = ['pdf', 'jpg', 'jpeg', 'png', 'txt', 'doc', 'docx'];
 $tailleMax = 2 * 1024 * 1024;
-$dossier = __DIR__ . '/uploads/';
+$dossier = __DIR__ . '/travaux/';
+
+if (!is_dir($dossier)) {
+    mkdir($dossier, 0755, true);
+}
 
 $erreur = '';
 $message = '';
@@ -15,26 +19,42 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['fichier'])) {
 } else {
     $nomOriginal = basename($_FILES['fichier']['name']);
     $extension = strtolower(pathinfo($nomOriginal, PATHINFO_EXTENSION));
-    $taille = $_FILES['fichier']['size'];
+    $taille = (int) $_FILES['fichier']['size'];
 
-    if (!in_array($extension, $formats)) {
+    if (!in_array($extension, $formats, true)) {
         $erreur = "Format non autorisé. Formats acceptés : " . implode(', ', $formats) . ".";
     } elseif ($taille > $tailleMax) {
         $erreur = "Le fichier dépasse 2 Mo.";
     } else {
-        $nomStocke = uniqid() . '.' . $extension;
+        $nomStocke = uniqid('epsilon_', true) . '.' . $extension;
+        $cheminDestination = $dossier . $nomStocke;
 
-        if (move_uploaded_file($_FILES['fichier']['tmp_name'], $dossier . $nomStocke)) {
+        if (move_uploaded_file($_FILES['fichier']['tmp_name'], $cheminDestination)) {
             try {
-                $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPass);
-                $requete = $pdo->prepare("INSERT INTO fichiers (nom_original, nom_stocke, extension, taille) VALUES (?, ?, ?, ?)");
-                $requete->execute([$nomOriginal, $nomStocke, $extension, $taille]);
-                $message = "Le fichier « " . htmlspecialchars($nomOriginal) . " » a bien été envoyé.";
+                $pdo = new PDO(
+                    "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4",
+                    $dbUser,
+                    $dbPass,
+                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                );
+
+                $requete = $pdo->prepare(
+                    "INSERT INTO fichiers (nom_original, nom_stocke, extension, taille)
+                     VALUES (:nom_original, :nom_stocke, :extension, :taille)"
+                );
+                $requete->execute([
+                    ':nom_original' => $nomOriginal,
+                    ':nom_stocke'   => $nomStocke,
+                    ':extension'    => $extension,
+                    ':taille'       => $taille,
+                ]);
+
+                $message = "Le fichier « " . htmlspecialchars($nomOriginal) . " » a bien été enregistré dans <strong>travaux/</strong> et référencé en base de données.";
             } catch (PDOException $e) {
-                $erreur = "Fichier déposé, mais erreur de base de données : " . htmlspecialchars($e->getMessage());
+                $erreur = "Fichier déposé dans travaux/, mais erreur de base de données : " . htmlspecialchars($e->getMessage());
             }
         } else {
-            $erreur = "Impossible d'enregistrer le fichier sur le serveur.";
+            $erreur = "Impossible d'enregistrer le fichier dans le dossier travaux.";
         }
     }
 }
@@ -44,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['fichier'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Résultat de l'envoi</title>
+    <title>EPSILON — Résultat de l'envoi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 </head>
@@ -52,7 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['fichier'])) {
 
 <nav class="navbar navbar-dark bg-dark">
     <div class="container">
-        <span class="navbar-brand"><i class="bi bi-cloud-arrow-up"></i> Dépôt de documents</span>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.php">
+            <img src="Documents/epsilon.png" alt="Logo EPSILON" height="32" class="rounded">
+            <span>EPSILON</span>
+        </a>
     </div>
 </nav>
 
@@ -73,7 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['fichier'])) {
     </div>
 </main>
 
-<footer class="text-center text-muted small py-3">Yacine Harrache · Maintenance Applicative</footer>
+<footer class="text-center text-muted small py-3">
+    Copyright &copy; 2026 EPSI LILLE · Yacine Harrache · Maintenance Applicative
+</footer>
 
 </body>
 </html>

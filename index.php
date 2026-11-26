@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dépôt de documents</title>
+    <title>EPSILON — Dépôt de documents</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 </head>
@@ -11,26 +11,31 @@
 
 <nav class="navbar navbar-dark bg-dark">
     <div class="container">
-        <span class="navbar-brand"><i class="bi bi-cloud-arrow-up"></i> Dépôt de documents</span>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.php">
+            <img src="documents/epsilon.png" alt="Logo EPSILON" height="32" class="rounded">
+            <span>EPSILON</span>
+        </a>
     </div>
 </nav>
 
 <main class="container my-auto py-5" style="max-width: 520px;">
     <div class="card shadow border-0">
-        <div class="card-header bg-dark text-white">
-            <i class="bi bi-file-earmark-arrow-up"></i> Envoyer un fichier
+        <div class="card-header bg-dark text-white d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-file-earmark-arrow-up"></i> Envoyer un fichier</span>
+            <img src="documents/epsilon.png" alt="EPSILON" height="24" class="rounded">
         </div>
         <div class="card-body p-4">
             <form action="upload.php" method="post" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="fichier" class="form-label fw-semibold">Votre document</label>
-                    <input type="file" class="form-control form-control-lg" name="fichier" id="fichier" accept=".pdf,.jpg,.jpeg,.png,.txt,.docx" required>
+                    <input type="file" class="form-control form-control-lg" name="fichier" id="fichier" accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx" required>
                 </div>
                 <div class="mb-4">
                     <span class="badge text-bg-light border">PDF</span>
                     <span class="badge text-bg-light border">JPG</span>
                     <span class="badge text-bg-light border">PNG</span>
                     <span class="badge text-bg-light border">TXT</span>
+                    <span class="badge text-bg-light border">DOC</span>
                     <span class="badge text-bg-light border">DOCX</span>
                     <small class="text-muted ms-1">2 Mo max</small>
                 </div>
@@ -42,7 +47,9 @@
     </div>
 </main>
 
-<footer class="text-center text-muted small py-3">Yacine Harrache · Maintenance Applicative</footer>
+<footer class="text-center text-muted small py-3">
+    Copyright &copy; 2026 EPSI LILLE · Yacine Harrache · Maintenance Applicative
+</footer>
 
 </body>
 </html>
